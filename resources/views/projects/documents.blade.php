@@ -21,7 +21,7 @@
                     </div>
                     <h4 class="precision-heading-5">Memorial Descritivo</h4>
                     <p class="precision-caption">Memorial descritivo padrão contendo todas as medidas de segurança e identificação da edificação.</p>
-                    <a href="{{ route('documents.memorial', $project) }}" class="precision-btn precision-btn-primary w-full mt-4">
+                    <a href="{{ route('documents.gerar', ['project' => $project, 'tipo' => 'memorial']) }}" target="_blank" download="memorial{{ str_pad($project->id, 4, '0', STR_PAD_LEFT) }}.docx" class="precision-btn precision-btn-primary w-full mt-4">
                         <i class="fas fa-download"></i> Baixar Documento
                     </a>
                 </div>
@@ -35,7 +35,7 @@
                     </div>
                     <h4 class="precision-heading-5">Ofício</h4>
                     <p class="precision-caption">Ofício de encaminhamento padrão do projeto para análise no Corpo de Bombeiros.</p>
-                    <a href="{{ route('documents.oficio', $project) }}" class="precision-btn precision-btn-primary w-full mt-4">
+                    <a href="{{ route('documents.gerar', ['project' => $project, 'tipo' => 'oficio']) }}" target="_blank" download="oficio{{ str_pad($project->id, 4, '0', STR_PAD_LEFT) }}.docx" class="precision-btn precision-btn-primary w-full mt-4">
                         <i class="fas fa-download"></i> Baixar Documento
                     </a>
                 </div>
@@ -49,7 +49,7 @@
                     </div>
                     <h4 class="precision-heading-5">Termos (ART/RRT)</h4>
                     <p class="precision-caption">Termos de compromisso e responsabilidade técnica preenchidos com os dados da obra.</p>
-                    <a href="{{ route('documents.termos', $project) }}" class="precision-btn precision-btn-primary w-full mt-4">
+                    <a href="{{ route('documents.gerar', ['project' => $project, 'tipo' => 'termos']) }}" target="_blank" download="termo{{ str_pad($project->id, 4, '0', STR_PAD_LEFT) }}.docx" class="precision-btn precision-btn-primary w-full mt-4">
                         <i class="fas fa-download"></i> Baixar Documento
                     </a>
                 </div>
@@ -64,7 +64,7 @@
                     </div>
                     <h4 class="precision-heading-5">Plano de Emergência</h4>
                     <p class="precision-caption">Plano de Emergência Contra Incêndio (PNE) dimensionado para a população e risco.</p>
-                    <a href="{{ route('documents.pne', $project) }}" class="precision-btn precision-btn-primary w-full mt-4" style="background-color: var(--color-success);">
+                    <a href="{{ route('documents.gerar', ['project' => $project, 'tipo' => 'pne']) }}" target="_blank" download="pne{{ str_pad($project->id, 4, '0', STR_PAD_LEFT) }}.docx" class="precision-btn precision-btn-primary w-full mt-4" style="background-color: var(--color-success);">
                         <i class="fas fa-download"></i> Baixar PNE
                     </a>
                 </div>

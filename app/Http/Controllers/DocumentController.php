@@ -8,6 +8,7 @@ use App\Services\Documents\PlanoEmergencia;
 use App\Services\Documents\OficioMemorialBasico;
 use App\Services\Documents\Termos;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DocumentController extends Controller
 {
@@ -29,10 +30,27 @@ class DocumentController extends Controller
             $classe = $this->geradores[$tipo];
             $path = (new $classe())->gerar($project);
 
-            $filename = $project->codigo_interno . '-' . $tipo . '.docx';
+            $idFormatado = str_pad($project->id, 4, '0', STR_PAD_LEFT);
+            $tipoNome = match($tipo) {
+                'memorial' => 'memorial',
+                'plano-emergencia' => 'pne',
+                'oficio' => 'oficio',
+                'termo-compromisso', 'termo-saidas-emergencia' => 'termo',
+                default => 'doc'
+            };
+            $filename = $tipoNome . $idFormatado . '.docx';
 
-            return response()->download($path, $filename, [
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+
+            $content = file_get_contents($path);
+
+            return response($content, 200, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'max-age=0',
+                'Content-Length' => strlen($content),
             ]);
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao gerar documento: ' . $e->getMessage());
