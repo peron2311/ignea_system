@@ -18,6 +18,7 @@
             tipo_documento: '{{ $project->tipo_documento }}',
             cpf_cnpj: '{{ $project->cpf_cnpj }}',
             endereco: '{{ $project->endereco }}',
+            inscricao_imobiliaria: '{{ $project->inscricao_imobiliaria }}',
             cidade: '{{ $project->cidade }}',
             estado: '{{ $project->estado }}',
             area_total: '{{ $project->area_total }}',
@@ -138,6 +139,10 @@
                         <div>
                             <label class="precision-label">Endereço Completo</label>
                             <input type="text" name="endereco" x-model="form.endereco" class="precision-input">
+                        </div>
+                        <div>
+                            <label class="precision-label">Indicação Fiscal/Inscrição Imobiliária</label>
+                            <input type="text" name="inscricao_imobiliaria" x-model="form.inscricao_imobiliaria" class="precision-input">
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 precision-gap-16">
                             <div>
