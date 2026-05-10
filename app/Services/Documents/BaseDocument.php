@@ -28,10 +28,26 @@ abstract class BaseDocument
      */
     protected function getTemplateProcessor(): TemplateProcessor
     {
-        if (!file_exists($this->templatePath)) {
-            throw new Exception("Template não encontrado: " . $this->templatePath);
+        $path = $this->templatePath;
+
+        // Se o caminho estiver com o formato fixo do Windows (C:/xampp...), tenta converter para relativo
+        if (str_contains(strtolower($path), 'c:/xampp/htdocs/ignea_system/resources/')) {
+            $parts = explode('resources/', str_replace('\\', '/', $path));
+            if (isset($parts[1])) {
+                $path = resource_path($parts[1]);
+            }
         }
-        return new TemplateProcessor($this->templatePath);
+
+        // Se o caminho não existir, tenta resolver como um caminho relativo dentro de resources/
+        if (!file_exists($path)) {
+            $path = resource_path($this->templatePath);
+        }
+
+        if (!file_exists($path)) {
+            throw new Exception("Template não encontrado: " . $path . " (Original: " . $this->templatePath . ")");
+        }
+        
+        return new TemplateProcessor($path);
     }
 
     /**
