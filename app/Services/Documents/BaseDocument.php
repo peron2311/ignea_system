@@ -2,102 +2,147 @@
 
 namespace App\Services\Documents;
 
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\Shared\Converter;
+use PhpOffice\PhpWord\TemplateProcessor;
+use App\Models\Project;
+use Exception;
 
 abstract class BaseDocument
 {
-    protected PhpWord $phpWord;
-    protected $section;
+    /**
+     * O caminho para o template .docx
+     */
+    protected string $templatePath;
 
-    // Cor institucional Ígnea #912F46
-    protected string $corIgnea = '912F46';
-    protected string $corBranco = 'FFFFFF';
-    protected string $corCinza = 'D9D9D9';
+    /**
+     * O prefixo para o nome do arquivo gerado
+     */
+    protected string $filePrefix = 'Documento';
 
     public function __construct()
     {
-        $this->phpWord = new PhpWord();
-        $this->configurarEstilos();
+        // As subclasses devem definir o $templatePath no seu construtor
     }
 
-    protected function configurarEstilos(): void
+    /**
+     * Retorna o processador de template inicializado
+     */
+    protected function getTemplateProcessor(): TemplateProcessor
     {
-        // Estilo padrão Normal
-        $this->phpWord->addFontStyle('Normal', [
-            'name' => 'Arial', 'size' => 12,
-        ]);
-        $this->phpWord->addParagraphStyle('Normal', [
-            'lineHeight' => 1.5, 'spaceAfter' => Converter::pointToTwip(10),
-            'alignment'  => 'both',
-        ]);
-
-        // Títulos
-        $this->phpWord->addFontStyle('Titulo1', ['name' => 'Arial', 'size' => 20, 'bold' => true, 'color' => $this->corIgnea]);
-        $this->phpWord->addParagraphStyle('Titulo1', ['lineHeight' => 1.5, 'spaceBefore' => Converter::pointToTwip(14), 'spaceAfter' => Converter::pointToTwip(10), 'keepNext' => true]);
-
-        $this->phpWord->addFontStyle('Titulo2', ['name' => 'Arial', 'size' => 16, 'bold' => true, 'color' => $this->corIgnea]);
-        $this->phpWord->addParagraphStyle('Titulo2', ['lineHeight' => 1.5, 'spaceBefore' => Converter::pointToTwip(12), 'spaceAfter' => Converter::pointToTwip(10), 'keepNext' => true]);
-
-        $this->phpWord->addFontStyle('Titulo3', ['name' => 'Arial', 'size' => 12, 'bold' => true, 'color' => $this->corIgnea]);
-        $this->phpWord->addParagraphStyle('Titulo3', ['lineHeight' => 1.5, 'spaceBefore' => Converter::pointToTwip(10), 'spaceAfter' => Converter::pointToTwip(8), 'keepNext' => true]);
-    }
-
-    protected function criarSecao(): void
-    {
-        $this->section = $this->phpWord->addSection([
-            'paperSize'    => 'A4',
-            'marginTop'    => Converter::cmToTwip(4.0),
-            'marginBottom' => Converter::cmToTwip(3.0),
-            'marginLeft'   => Converter::cmToTwip(3.0),
-            'marginRight'  => Converter::cmToTwip(2.5),
-        ]);
-        $this->adicionarPapelTimbrado();
-    }
-
-    protected function adicionarPapelTimbrado(): void
-    {
-        $imagePath = resource_path('templates/papel_timbrado.png');
-        if (!file_exists($imagePath)) return;
-
-        $header = $this->section->addHeader();
-        $header->addWatermark($imagePath, [
-            'marginTop' => 0, 'marginLeft' => 0,
-        ]);
-    }
-
-    protected function addHeading(string $texto, int $nivel = 1): void
-    {
-        $this->section->addText(htmlspecialchars($texto), "Titulo{$nivel}", "Titulo{$nivel}");
-    }
-
-    protected function addParagrafo(string $texto, bool $negrito = false): void
-    {
-        $fontStyle = $negrito ? ['name' => 'Arial', 'size' => 12, 'bold' => true] : 'Normal';
-        $this->section->addText(htmlspecialchars($texto), $fontStyle, 'Normal');
-    }
-
-    protected function addBullet(string $texto): void
-    {
-        $this->section->addListItem(htmlspecialchars($texto), 0, 'Normal');
-    }
-
-    protected function addQuebraDePagina(): void
-    {
-        $this->section->addPageBreak();
-    }
-
-    abstract public function gerar($project): string;
-
-    protected function salvar(string $nomeArquivo): string
-    {
-        $path = storage_path("app/generated/{$nomeArquivo}");
-        if (!is_dir(dirname($path))) {
-            mkdir(dirname($path), 0755, true);
+        if (!file_exists($this->templatePath)) {
+            throw new Exception("Template não encontrado: " . $this->templatePath);
         }
-        $writer = IOFactory::createWriter($this->phpWord, 'Word2007');
-        $writer->save($path);
+        return new TemplateProcessor($this->templatePath);
+    }
+
+    /**
+     * Retorna um valor padrão se a variável for vazia
+     */
+    protected function val(?string $value, string $default = 'Não informado'): string
+    {
+        return empty(trim((string)$value)) ? $default : $value;
+    }
+
+    /**
+     * Define um valor no template de forma segura (evita erro de tipo no PHP 8.1+)
+     */
+    protected function setSafeValue(TemplateProcessor $processor, string $key, $value): void
+    {
+        if (is_array($value)) {
+            // Se for um array simples (strings/números), junta com vírgula.
+            // Se for complexo (objetos), converte para JSON ou ignora para evitar erro.
+            try {
+                $isSimple = true;
+                foreach ($value as $item) {
+                    if (is_array($item) || is_object($item)) {
+                        $isSimple = false;
+                        break;
+                    }
+                }
+                $value = $isSimple ? implode(', ', $value) : json_encode($value, JSON_UNESCAPED_UNICODE);
+            } catch (\Exception $e) {
+                $value = '[Erro de conversão]';
+            }
+        }
+        
+        if (is_bool($value)) {
+            $value = $value ? 'Sim' : 'Não';
+        }
+        
+        $processor->setValue($key, (string)($value ?? ''));
+    }
+
+    /**
+     * Formata área em m²
+     */
+    protected function formatArea(?float $value): string
+    {
+        if (!$value) return 'Não informado';
+        return number_format($value, 2, ',', '.') . ' m²';
+    }
+
+    /**
+     * Preenche os dados básicos do projeto no template
+     */
+    protected function preencherDadosBasicos(TemplateProcessor $processor, Project $project): void
+    {
+        $dados = $project->getTemplateData();
+        
+        foreach ($dados as $chave => $valor) {
+            // Tratamento especial para blocos (começam com has_)
+            if (str_starts_with($chave, 'has_')) {
+                $nomeBloco = 'block_' . str_replace('has_', '', $chave);
+                if ($valor === true) {
+                    $processor->cloneBlock($nomeBloco, 1, true, false);
+                } else {
+                    $processor->cloneBlock($nomeBloco, 0, true, false);
+                }
+            } else {
+                $this->setSafeValue($processor, $chave, $valor);
+            }
+        }
+
+        // Esconde os blocos que não vieram marcados (false/inexistentes)
+        $todosOsBlocos = [
+            'rec_acesso', 'rec_separacao', 'rec_estrutural', 'rec_compartimentacao',
+            'rec_materiais', 'rec_saidas', 'rec_elevador', 'rec_brigada', 'rec_iluminacao',
+            'rec_alarme', 'rec_sinalizacao', 'rec_extintores', 'rec_hidrantes', 'rec_chuveiros',
+            'rec_controle_fumaca', 'rec_liquidos'
+        ];
+        foreach ($todosOsBlocos as $bloco) {
+            if (!isset($dados['has_' . $bloco])) {
+                $processor->cloneBlock('block_' . $bloco, 0, true, false);
+            }
+        }
+    }
+
+    /**
+     * Salva o documento e retorna o caminho
+     */
+    protected function salvar(TemplateProcessor $processor, Project $project, string $sulfixo = ''): string
+    {
+        // Auto-injetar os dados do projeto antes de salvar!
+        $this->preencherDadosBasicos($processor, $project);
+
+        $fileName = sprintf('%s_%s%s.docx',
+            $project->codigo_interno ?: 'PROJ',
+            $this->filePrefix,
+            $sulfixo ? '_' . $sulfixo : ''
+        );
+
+        $path = storage_path("app/generated/{$fileName}");
+        
+        $dir = dirname($path);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $processor->saveAs($path);
+        
         return $path;
     }
+
+    /**
+     * O método principal de geração, que toda classe filha deve implementar.
+     */
+    abstract public function gerar(Project $project): string;
 }

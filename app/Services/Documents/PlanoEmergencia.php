@@ -2,11 +2,19 @@
 
 namespace App\Services\Documents;
 
+use App\Models\Project;
 use App\Services\Calculations\PciCalculations;
 
 class PlanoEmergencia extends BaseDocument
 {
-    public function gerar($project): string
+    protected string $filePrefix = 'Plano_Emergencia';
+
+    public function __construct()
+    {
+        $this->templatePath = resource_path('templates/word/25.110-PL-PE-PCI-00.docx');
+    }
+
+    public function gerar(Project $project): string
     {
         $this->criarSecao();
 

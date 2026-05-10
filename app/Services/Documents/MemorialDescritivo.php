@@ -2,9 +2,18 @@
 
 namespace App\Services\Documents;
 
+use App\Models\Project;
+
 class MemorialDescritivo extends BaseDocument
 {
-    public function gerar($project): string
+    protected string $filePrefix = 'Memorial';
+
+    public function __construct()
+    {
+        $this->templatePath = resource_path('templates/word/X.XXX-PL-MD-PCI-00.docx');
+    }
+
+    public function gerar(Project $project): string
     {
         $this->criarSecao();
 

@@ -2,12 +2,20 @@
 
 namespace App\Services\Documents;
 
+use App\Models\Project;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\Shared\Converter;
 
 class OficioMemorialBasico extends BaseDocument
 {
-    public function gerar($project): string
+    protected string $filePrefix = 'Oficio';
+
+    public function __construct()
+    {
+        $this->templatePath = resource_path('templates/word/Oficio de Apresentação do PSCIP (MODELO PARANÁ) XX.XXX-PL-OA-PCI-00.docx');
+    }
+
+    public function gerar(Project $project): string
     {
         $this->criarSecao();
 
