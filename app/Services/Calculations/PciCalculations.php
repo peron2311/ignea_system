@@ -99,4 +99,81 @@ class PciCalculations
             'trrf'         => $trrf,
         ];
     }
+
+    public static function calcularTrrfPorOcupacoes(array $ocupacoes, float $altura): array
+    {
+        return collect($ocupacoes)
+            ->map(fn($o) => self::calcularTrrf($o['divisao'] ?? '', $altura))
+            ->unique('divisao')
+            ->values()
+            ->toArray();
+    }
+
+    // ── Distâncias de extintores NPT 021 ─────────────────────────────────
+    public static function calcularDistanciaExtintores(float $ciMedia): array
+    {
+        if ($ciMedia <= 300)  return ['dist_base' => 25, 'sem_layout' => 17];
+        if ($ciMedia <= 1200) return ['dist_base' => 20, 'sem_layout' => 14];
+        return ['dist_base' => 15, 'sem_layout' => 10];
+    }
+
+    // ── Mapeamentos ───────────────────────────────────────────────────────
+    public static array $medidasDisponiveis = [
+        'acesso_viaturas'       => 'Acesso de Viatura na Edificação',
+        'isolamento_risco'      => 'Separação entre Edificações (Isolamento de Risco)',
+        'seguranca_estrutural'  => 'Segurança Estrutural Contra Incêndio',
+        'compartimentacao'      => 'Compartimentação Horizontal e Vertical',
+        'materiais_acabamento'  => 'Controle de Materiais de Acabamento (CMAR)',
+        'saidas_emergencia'     => 'Saídas de Emergência',
+        'controle_fumaca'       => 'Controle de Fumaça',
+        'plano_emergencia'      => 'Plano de Emergência',
+        'brigada'               => 'Brigada de Incêndio',
+        'iluminacao_emergencia' => 'Iluminação de Emergência',
+        'alarme_deteccao'       => 'Sistema de Detecção e Alarme de Incêndio',
+        'sinalizacao'           => 'Sinalização de Emergência',
+        'extintor'              => 'Extintor de Incêndio',
+        'hidrante'              => 'Hidrantes e Mangotinhos',
+        'chuveiros_automaticos' => 'Chuveiros Automáticos',
+        'liquidos_inflamaveis'  => 'Líquidos e Gases Combustíveis e Inflamáveis',
+        'spda'                  => 'SPDA',
+        'glp'                   => 'Central de GLP',
+    ];
+
+    public static array $medidasNpt = [
+        'acesso_viaturas'       => 'NPT 006',
+        'isolamento_risco'      => 'NPT 007',
+        'seguranca_estrutural'  => 'NPT 008',
+        'compartimentacao'      => 'NPT 009',
+        'materiais_acabamento'  => 'NPT 010',
+        'saidas_emergencia'     => 'NPT 011',
+        'controle_fumaca'       => 'NPT 015',
+        'plano_emergencia'      => 'NPT 016',
+        'brigada'               => 'NPT 017',
+        'iluminacao_emergencia' => 'NPT 018',
+        'alarme_deteccao'       => 'NPT 019',
+        'sinalizacao'           => 'NPT 020',
+        'extintor'              => 'NPT 021',
+        'hidrante'              => 'NPT 022',
+        'chuveiros_automaticos' => 'NPT 023/024',
+        'liquidos_inflamaveis'  => 'NPT 025',
+        'spda'                  => 'NPT 026',
+        'glp'                   => 'NPT 028',
+    ];
+
+    // ── CI padrão por divisão (Tabela 1 CSCIP) ───────────────────────────
+    public static array $ciPorDivisao = [
+        'A-1'=>300,'A-2'=>300,'A-3'=>300,
+        'B-1'=>300,'B-2'=>300,
+        'C-1'=>300,'C-2'=>1000,'C-3'=>1000,
+        'D-1'=>300,'D-2'=>600,'D-3'=>600,'D-4'=>600,
+        'E-1'=>300,'E-2'=>300,'E-3'=>300,'E-4'=>300,'E-5'=>300,'E-6'=>300,
+        'F-1'=>300,'F-2'=>300,'F-3'=>300,'F-4'=>300,'F-5'=>600,
+        'F-6'=>600,'F-7'=>300,'F-8'=>600,'F-9'=>300,'F-10'=>300,'F-11'=>600,
+        'G-1'=>600,'G-2'=>600,'G-3'=>1200,'G-4'=>600,'G-5'=>1200,'G-6'=>600,
+        'H-1'=>300,'H-2'=>300,'H-3'=>300,'H-4'=>300,'H-5'=>300,'H-6'=>300,
+        'I-1'=>300,'I-2'=>600,'I-3'=>1200,
+        'J-1'=>100,'J-2'=>300,'J-3'=>600,'J-4'=>1200,
+        'L-1'=>1200,'L-2'=>1200,'L-3'=>1200,
+        'M-1'=>600,'M-2'=>1200,'M-3'=>600,'M-4'=>300,'M-5'=>1200,'M-6'=>300,'M-7'=>300,
+    ];
 }

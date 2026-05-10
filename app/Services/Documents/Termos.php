@@ -2,40 +2,44 @@
 
 namespace App\Services\Documents;
 
+use App\Models\Project;
+
 class Termos extends BaseDocument
 {
-    public function gerar($project): string
+    protected string $filePrefix = 'Termo';
+
+    public function gerar(Project $project): string
     {
-        return $this->gerarTermoCompromisso($project);
+        return ""; // Usaremos os métodos específicos
     }
 
-    public function gerarTermoCompromisso($project): string
+    public function gerarTermoCompromisso(Project $project): string
     {
-        $this->criarSecao();
-
-        $this->addHeading("TERMO DE COMPROMISSO E RESPONSABILIDADE", 1);
-        
-        $this->addParagrafo("Eu, " . $project->nome_proprietario . ", portador do " . $project->tipo_documento . " nº " . $project->cpf_cnpj . ", na qualidade de proprietário/responsável pelo uso da edificação denominada " . $project->nome_obra . ", localizada em " . $project->endereco . ", comprometo-me a:");
-        
-        $this->addBullet("Manter as medidas de segurança contra incêndio e pânico em perfeitas condições de uso.");
-        $this->addBullet("Treinar os funcionários conforme o Plano de Emergência.");
-        $this->addBullet("Não alterar as características da edificação sem prévia autorização do Corpo de Bombeiros.");
-
-        $this->addParagrafo("\nPor ser verdade, firmo o presente.");
-
-        $this->addParagrafo("\n\nCascavel, " . date('d/m/Y') . ".");
-
-        $this->addParagrafo("\n\n__________________________________________");
-        $this->addParagrafo($project->nome_proprietario, true);
-
-        return $this->salvar($project->codigo_interno . "-termo-compromisso.docx");
+        $this->templatePath = 'C:/xampp/htdocs/ignea_system/resources/templates/word/1. TERMO DE COMPROMISSO ÍGNEA.docx';
+        return $this->salvar($this->getTemplateProcessor(), $project, 'Compromisso');
     }
 
-    public function gerarTermoSaidasEmergencia($project): string
+    public function gerarTermoEntregaProjetos(Project $project): string
     {
-        $this->criarSecao();
-        $this->addHeading("TERMO DE RESPONSABILIDADE DAS SAÍDAS DE EMERGÊNCIA", 1);
-        $this->addParagrafo("O proprietário declara que as saídas de emergência estão dimensionadas conforme a NPT 011.");
-        return $this->salvar($project->codigo_interno . "-termo-saidas.docx");
+        $this->templatePath = 'C:/xampp/htdocs/ignea_system/resources/templates/word/2. TERMO DE ENTREGA DE PROJETOS ÍGNEA.docx';
+        return $this->salvar($this->getTemplateProcessor(), $project, 'Entrega_Projetos');
+    }
+
+    public function gerarTermoSaidasEmergencia(Project $project): string
+    {
+        $this->templatePath = 'C:/xampp/htdocs/ignea_system/resources/templates/word/3. TERMO DE RESPONSABILIDADE DAS SAÍDAS DE EMERGÊNCIA.docx';
+        return $this->salvar($this->getTemplateProcessor(), $project, 'Saidas_Emergencia');
+    }
+
+    public function gerarTermoSindico(Project $project): string
+    {
+        $this->templatePath = 'C:/xampp/htdocs/ignea_system/resources/templates/word/4. TERMO DE ENTREGA PARA SINDICO (para construtora entregar ao sindico futuramente).docx';
+        return $this->salvar($this->getTemplateProcessor(), $project, 'Sindico');
+    }
+
+    public function gerarTermoInquilino(Project $project): string
+    {
+        $this->templatePath = 'C:/xampp/htdocs/ignea_system/resources/templates/word/4. TERMO DE ENTREGA PARA INQUILINO (para construtora entregar ao inquilino futuramente).docx';
+        return $this->salvar($this->getTemplateProcessor(), $project, 'Inquilino');
     }
 }

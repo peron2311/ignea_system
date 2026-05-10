@@ -3,43 +3,45 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Services\Documents\MemorialDescritivo;
-use App\Services\Documents\PlanoEmergencia;
-use App\Services\Documents\OficioMemorialBasico;
-use App\Services\Documents\Termos;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Services\Documents\{
+    MemorialDescritivo, PlanoEmergencia, OficioMemorialBasico,
+    MemorialIndustrial, MemorialExecutivo, ManualTecnico, Termos, DocumentosEspeciais
+};
 
 class DocumentController extends Controller
 {
     private array $geradores = [
-        'memorial'                => MemorialDescritivo::class,
-        'plano-emergencia'        => PlanoEmergencia::class,
-        'oficio'                  => OficioMemorialBasico::class,
-        'termo-compromisso'       => [Termos::class, 'gerarTermoCompromisso'],
-        'termo-saidas-emergencia' => [Termos::class, 'gerarTermoSaidasEmergencia'],
+        'memorial'                 => MemorialDescritivo::class,
+        'oficio'                   => OficioMemorialBasico::class,
+        'plano-emergencia'         => PlanoEmergencia::class,
+        'memorial-industrial'      => MemorialIndustrial::class,
+        'memorial-executivo'       => MemorialExecutivo::class,
+        'manual-tecnico'           => ManualTecnico::class,
+        'termo-compromisso'        => [Termos::class, 'gerarTermoCompromisso'],
+        'termo-entrega-projetos'   => [Termos::class, 'gerarTermoEntregaProjetos'],
+        'termo-saidas-emergencia'  => [Termos::class, 'gerarTermoSaidasEmergencia'],
+        'termo-sindico'            => [Termos::class, 'gerarTermoSindico'],
+        'termo-inquilino'          => [Termos::class, 'gerarTermoInquilino'],
+        'comprovacao-existencia'   => [DocumentosEspeciais::class, 'gerarComprovacao'],
+        'requerimento-substituicao'=> [DocumentosEspeciais::class, 'gerarRequerimento'],
     ];
 
     public function gerar(Project $project, string $tipo)
     {
-        if (!isset($this->geradores[$tipo])) {
-            abort(404, "Tipo de documento não encontrado: {$tipo}");
-        }
+        abort_unless(isset($this->geradores[$tipo]), 404, "Documento '$tipo' não encontrado.");
 
         try {
-            $classe = $this->geradores[$tipo];
-            $path = (new $classe())->gerar($project);
+            $gerador = $this->geradores[$tipo];
 
-            $idFormatado = str_pad($project->id, 4, '0', STR_PAD_LEFT);
-            $tipoNome = match($tipo) {
-                'memorial' => 'memorial',
-                'plano-emergencia' => 'pne',
-                'oficio' => 'oficio',
-                'termo-compromisso', 'termo-saidas-emergencia' => 'termo',
-                default => 'doc'
-            };
-            $filename = $tipoNome . $idFormatado . '.docx';
+            if (is_array($gerador)) {
+                [$classe, $metodo] = $gerador;
+                $path = (new $classe())->$metodo($project);
+            } else {
+                $path = (new $gerador())->gerar($project);
+            }
 
+            $filename = ($project->codigo_interno ?: 'PROJ') . '-' . $tipo . '.docx';
+            
             if (ob_get_length()) {
                 ob_end_clean();
             }
@@ -52,6 +54,7 @@ class DocumentController extends Controller
                 'Cache-Control' => 'max-age=0',
                 'Content-Length' => strlen($content),
             ]);
+
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao gerar documento: ' . $e->getMessage());
         }

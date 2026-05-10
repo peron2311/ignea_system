@@ -18,6 +18,7 @@
             tipo_documento: 'CNPJ',
             cpf_cnpj: '',
             endereco: '',
+            inscricao_imobiliaria: '',
             cidade: 'Cascavel',
             estado: 'PR',
             area_total: '',
@@ -29,6 +30,13 @@
             tem_gerador: false,
             tem_subestacao: false,
             pne: false,
+            edificacao_residencial: false,
+            edificacao_aluguel: false,
+            porta_correr_saida_emergencia: false,
+            edificacao_existente: false,
+            substituicao_projeto: false,
+            recomendacoes_selecionadas: [],
+            dados_especificos: {},
         },
         addOcupacao() {
             this.form.ocupacoes.push({ divisao: 'F-1', area: '', ci: 300 });
@@ -40,6 +48,11 @@
             const idx = this.form.medidas_selecionadas.indexOf(key);
             if (idx === -1) this.form.medidas_selecionadas.push(key);
             else this.form.medidas_selecionadas.splice(idx, 1);
+        },
+        toggleRecomendacao(key) {
+            const idx = this.form.recomendacoes_selecionadas.indexOf(key);
+            if (idx === -1) this.form.recomendacoes_selecionadas.push(key);
+            else this.form.recomendacoes_selecionadas.splice(idx, 1);
         },
         submit() {
             $refs.mainForm.submit();
@@ -106,6 +119,54 @@
                             <input type="text" name="cidade_analise_bombeiros" class="precision-input" placeholder="Cascavel">
                         </div>
                     </div>
+                    
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <h4 class="font-bold text-gray-800 mb-4">Responsável Técnico</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label class="precision-label">Nome do RT</label>
+                                <input type="text" name="rt_nome" x-model="form.dados_especificos.rt_nome" class="precision-input" placeholder="Ex: Eng. Ana Julia">
+                            </div>
+                            <div>
+                                <label class="precision-label">CREA/CAU</label>
+                                <input type="text" name="rt_crea" x-model="form.dados_especificos.rt_crea" class="precision-input" placeholder="Ex: 168.913/D">
+                            </div>
+                            <div>
+                                <label class="precision-label">E-mail</label>
+                                <input type="email" name="rt_email" x-model="form.dados_especificos.rt_email" class="precision-input" placeholder="email@exemplo.com">
+                            </div>
+                            <div>
+                                <label class="precision-label">Telefone</label>
+                                <input type="text" name="rt_telefone" x-model="form.dados_especificos.rt_telefone" class="precision-input" placeholder="(00) 00000-0000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <h4 class="font-bold text-gray-800 mb-4">Condições Especiais da Edificação</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="edificacao_existente" x-model="form.edificacao_existente" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">Edificação Existente (Gera Comprovação)</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="substituicao_projeto" x-model="form.substituicao_projeto" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">Substituição de Projeto (Gera Requerimento)</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="edificacao_residencial" x-model="form.edificacao_residencial" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">Edifício Residencial (Gera Termo Síndico)</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="edificacao_aluguel" x-model="form.edificacao_aluguel" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">Para Aluguel (Gera Termo Inquilino)</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100">
+                                <input type="checkbox" name="porta_correr_saida_emergencia" x-model="form.porta_correr_saida_emergencia" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">Portas de Correr (Gera Termo de Responsabilidade)</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Step 2: Proprietário -->
@@ -129,6 +190,24 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <h4 class="font-bold text-gray-800 mb-4">Dados do Signatário (Termos)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="precision-label">Nome do Signatário</label>
+                                <input type="text" name="nome_signatario" x-model="form.dados_especificos.nome_signatario" class="precision-input" placeholder="Quem assina os termos">
+                            </div>
+                            <div>
+                                <label class="precision-label">CPF</label>
+                                <input type="text" name="cpf_signatario" x-model="form.dados_especificos.cpf_signatario" class="precision-input">
+                            </div>
+                            <div>
+                                <label class="precision-label">RG</label>
+                                <input type="text" name="rg_signatario" x-model="form.dados_especificos.rg_signatario" class="precision-input">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Step 3: Endereço -->
@@ -137,6 +216,10 @@
                         <div>
                             <label class="precision-label">Endereço Completo</label>
                             <input type="text" name="endereco" x-model="form.endereco" class="precision-input">
+                        </div>
+                        <div>
+                            <label class="precision-label">Indicação Fiscal/Inscrição Imobiliária</label>
+                            <input type="text" name="inscricao_imobiliaria" x-model="form.inscricao_imobiliaria" class="precision-input">
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 precision-gap-16">
                             <div>
@@ -159,6 +242,14 @@
                             <input type="number" step="0.01" name="area_total" x-model="form.area_total" class="precision-input">
                         </div>
                         <div>
+                            <label class="precision-label">Área Fria (m²)</label>
+                            <input type="number" step="0.01" name="area_fria" x-model="form.dados_especificos.area_fria" class="precision-input" placeholder="Ex: Piscinas, etc.">
+                        </div>
+                        <div>
+                            <label class="precision-label">Área Protegida (m²)</label>
+                            <div class="precision-input bg-gray-50 flex items-center" x-text="(form.area_total - (form.dados_especificos.area_fria || 0)).toFixed(2)"></div>
+                        </div>
+                        <div>
                             <label class="precision-label">Altura (m)</label>
                             <input type="number" step="0.01" name="altura" x-model="form.altura" class="precision-input">
                         </div>
@@ -166,6 +257,19 @@
                             <label class="precision-label">Pavimentos</label>
                             <input type="number" name="num_pavimentos" x-model="form.num_pavimentos" class="precision-input">
                         </div>
+                        <div>
+                            <label class="precision-label">Via de Acesso</label>
+                            <input type="text" x-model="form.dados_especificos.via_acesso" class="precision-input" placeholder="Ex: Estrada Alto Salvador">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        <div><label class="precision-label">Estrutura</label><input type="text" x-model="form.dados_especificos.estrutura" class="precision-input" placeholder="Ex: Concreto Armado"></div>
+                        <div><label class="precision-label">Cobertura</label><input type="text" x-model="form.dados_especificos.cobertura" class="precision-input" placeholder="Ex: Telha metálica"></div>
+                        <div><label class="precision-label">Forro</label><input type="text" x-model="form.dados_especificos.forro" class="precision-input" placeholder="Ex: Gesso, Madeira"></div>
+                        <div><label class="precision-label">Pisos</label><input type="text" x-model="form.dados_especificos.pisos" class="precision-input" placeholder="Ex: Cerâmica e concreto"></div>
+                        <div><label class="precision-label">Esquadrias</label><input type="text" x-model="form.dados_especificos.esquadrias" class="precision-input" placeholder="Ex: Alumínio e vidro"></div>
+                        <div><label class="precision-label">Divisão Interna</label><input type="text" x-model="form.dados_especificos.divisao_interna" class="precision-input" placeholder="Ex: Alvenaria"></div>
                     </div>
 
                     <div class="p-6 bg-gray-50 rounded-xl border border-gray-200">
@@ -211,6 +315,7 @@
                                 'extintores' => 'Extintores',
                                 'hidrantes' => 'Hidrantes e Mangotinhos',
                                 'chuveiros_automaticos' => 'Chuveiros Automáticos',
+                                'plano_emergencia' => 'Plano de Emergência',
                             ];
                         @endphp
                         @foreach($medidas as $key => $label)
@@ -225,41 +330,179 @@
 
                 <!-- Step 6: Sistemas Específicos -->
                 <div x-show="step === 6" x-transition>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 flex flex-col justify-between space-y-4">
-                            <div class="precision-flex gap-3">
-                                <div class="icon-wrapper" style="background-color: #fffbeb;">
-                                    <i class="fas fa-fire text-amber-600"></i>
+                    <div class="space-y-6">
+                        <!-- Chaves Gerais (Sempre Visíveis) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 flex flex-col justify-between space-y-4">
+                                <div class="precision-flex gap-3">
+                                    <div class="icon-wrapper" style="background-color: #fffbeb;">
+                                        <i class="fas fa-fire text-amber-600"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-900">Central GLP</h4>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-gray-900">Central GLP</h4>
+                                <div class="precision-flex-between">
+                                    <span class="text-sm font-semibold text-gray-500" x-text="form.tem_glp ? 'Ativo' : 'Inativo'"></span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="tem_glp" x-model="form.tem_glp" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                                    </label>
+                                </div>
+                                <div x-show="form.tem_glp" x-transition class="mt-4 pt-4 border-t border-gray-200">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="precision-label">Tipo Cilindro</label>
+                                            <input type="text" x-model="form.dados_especificos.glp_tipo_cilindro" class="precision-input" placeholder="Ex: P-45 kg">
+                                        </div>
+                                        <div>
+                                            <label class="precision-label">Quantidade</label>
+                                            <input type="number" x-model="form.dados_especificos.glp_num_cilindros" class="precision-input">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="precision-flex-between">
-                                <span class="text-sm font-semibold text-gray-500" x-text="form.tem_glp ? 'Ativo' : 'Inativo'"></span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="tem_glp" x-model="form.tem_glp" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
-                                </label>
+
+                            <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 flex flex-col justify-between space-y-4">
+                                <div class="precision-flex gap-3">
+                                    <div class="icon-wrapper bg-blue-50">
+                                        <i class="fas fa-bolt text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-gray-900">Gerador</h4>
+                                    </div>
+                                </div>
+                                <div class="precision-flex-between">
+                                    <span class="text-sm font-semibold text-gray-500" x-text="form.tem_gerador ? 'Ativo' : 'Inativo'"></span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" name="tem_gerador" x-model="form.tem_gerador" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                                    </label>
+                                </div>
+                                <div x-show="form.tem_gerador" x-transition class="mt-4 pt-4 border-t border-gray-200">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="precision-label">Combustível</label>
+                                            <input type="text" x-model="form.dados_especificos.gerador_combustivel" class="precision-input" placeholder="Ex: Diesel">
+                                        </div>
+                                        <div>
+                                            <label class="precision-label">Capacidade (L)</label>
+                                            <input type="number" x-model="form.dados_especificos.gerador_capacidade_litros" class="precision-input">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 flex flex-col justify-between space-y-4">
-                            <div class="precision-flex gap-3">
-                                <div class="icon-wrapper bg-blue-50">
-                                    <i class="fas fa-bolt text-blue-600"></i>
+                        <!-- Painéis Dinâmicos Baseados nas Medidas Selecionadas -->
+                        <div x-show="form.medidas_selecionadas.includes('hidrantes')" x-transition class="p-6 bg-white rounded-xl border border-blue-200 shadow-sm">
+                            <h4 class="font-bold text-blue-900 mb-4 border-b pb-2"><i class="fas fa-fire-extinguisher mr-2"></i>Hidrantes e Mangotinhos</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label class="precision-label">Vazão (l/min)</label><input type="text" x-model="form.dados_especificos.hidrante_vazao_dimensionamento" class="precision-input"></div>
+                                <div><label class="precision-label">Pressão (mca)</label><input type="text" x-model="form.dados_especificos.hidrante_pressao_minima" class="precision-input"></div>
+                                <div><label class="precision-label">DN Esguicho (mm)</label><input type="text" x-model="form.dados_especificos.hidrante_dn_esguicho" class="precision-input"></div>
+                                <div><label class="precision-label">Bomba - Marca</label><input type="text" x-model="form.dados_especificos.bomba_marca" class="precision-input"></div>
+                                <div><label class="precision-label">Bomba - Modelo</label><input type="text" x-model="form.dados_especificos.bomba_modelo" class="precision-input"></div>
+                                <div><label class="precision-label">Bomba - CV</label><input type="text" x-model="form.dados_especificos.bomba_potencia_cv" class="precision-input"></div>
+                                <div><label class="precision-label">Reservatório (m³)</label><input type="text" x-model="form.dados_especificos.reservatorio_volume" class="precision-input"></div>
+                                <div><label class="precision-label">Lances Mangueira Int.</label><input type="text" x-model="form.dados_especificos.hidrante_lances_internos" class="precision-input"></div>
+                                <div><label class="precision-label">Lances Mangueira Ext.</label><input type="text" x-model="form.dados_especificos.hidrante_lances_externos" class="precision-input"></div>
+                            </div>
+                        </div>
+
+                        <div x-show="form.medidas_selecionadas.includes('deteccao_alarme')" x-transition class="p-6 bg-white rounded-xl border border-red-200 shadow-sm">
+                            <h4 class="font-bold text-red-900 mb-4 border-b pb-2"><i class="fas fa-bell mr-2"></i>Detecção e Alarme (SDAI)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                <div><label class="precision-label">Tipo do Sistema</label><input type="text" x-model="form.dados_especificos.sdai_tipo_sistema" class="precision-input" placeholder="Ex: endereçável"></div>
+                                <div><label class="precision-label">Topologia</label><input type="text" x-model="form.dados_especificos.sdai_topologia" class="precision-input" placeholder="Ex: Classe A"></div>
+                                <div><label class="precision-label">Local da Central</label><input type="text" x-model="form.dados_especificos.sdai_local_central" class="precision-input" placeholder="Ex: Portaria"></div>
+                            </div>
+                            <div>
+                                <label class="precision-label">Componentes do Sistema</label>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                    @foreach(['Central', 'Detectores Ópticos', 'Detectores Termovelocimétricos', 'Acionadores Manuais', 'Sinalizadores Audiovisuais', 'Módulos de Isolamento', 'Repetidoras'] as $comp)
+                                        <label class="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                                            <input type="checkbox" @change="
+                                                if(!form.dados_especificos.sdai_componentes) form.dados_especificos.sdai_componentes = [];
+                                                const idx = form.dados_especificos.sdai_componentes.indexOf('{{ $comp }}');
+                                                if(idx === -1) form.dados_especificos.sdai_componentes.push('{{ $comp }}');
+                                                else form.dados_especificos.sdai_componentes.splice(idx, 1);
+                                            " :checked="form.dados_especificos.sdai_componentes && form.dados_especificos.sdai_componentes.includes('{{ $comp }}')" class="rounded text-red-600">
+                                            <span class="text-xs">{{ $comp }}</span>
+                                        </label>
+                                    @endforeach
                                 </div>
+                            </div>
+                        </div>
+
+                        <div x-show="form.medidas_selecionadas.includes('brigada_incendio')" x-transition class="p-6 bg-white rounded-xl border border-orange-200 shadow-sm">
+                            <h4 class="font-bold text-orange-900 mb-4 border-b pb-2"><i class="fas fa-users mr-2"></i>Brigada de Incêndio</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div><label class="precision-label">Tipo Brigadista</label><input type="text" x-model="form.dados_especificos.tipo_brigadista" class="precision-input" placeholder="Ex: orgânicos"></div>
+                                <div><label class="precision-label">População Total</label><input type="number" x-model="form.dados_especificos.populacao_total" class="precision-input"></div>
                                 <div>
-                                    <h4 class="font-bold text-gray-900">Gerador</h4>
+                                    <label class="precision-label">População Exposta (1,3x)</label>
+                                    <div class="precision-input bg-gray-50 flex items-center" x-text="Math.ceil((form.dados_especificos.populacao_total || 0) * 1.3)"></div>
                                 </div>
+                                <div><label class="precision-label">Brigadistas Orgânicos</label><input type="number" x-model="form.dados_especificos.num_brigadistas_organicos" class="precision-input"></div>
+                                <div><label class="precision-label">Brigadistas Profissionais</label><input type="number" x-model="form.dados_especificos.num_brigadistas_profissionais" class="precision-input"></div>
+                                <div><label class="precision-label">Número Final</label><input type="number" x-model="form.dados_especificos.num_brigadistas" class="precision-input"></div>
+                                <div><label class="precision-label">Carga Horária (h)</label><input type="number" x-model="form.dados_especificos.carga_horaria_brigada" class="precision-input"></div>
+                                <div><label class="precision-label">Riscos Específicos</label><input type="text" x-model="form.dados_especificos.riscos_especificos_brigada" class="precision-input" placeholder="Ex: Espaço Confinado"></div>
                             </div>
-                            <div class="precision-flex-between">
-                                <span class="text-sm font-semibold text-gray-500" x-text="form.tem_gerador ? 'Ativo' : 'Inativo'"></span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="tem_gerador" x-model="form.tem_gerador" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+                        </div>
+
+                        <div x-show="form.medidas_selecionadas.includes('isolamento_risco')" x-transition class="p-6 bg-white rounded-xl border border-orange-200 shadow-sm">
+                            <h4 class="font-bold text-orange-900 mb-4 border-b pb-2"><i class="fas fa-arrows-alt-h mr-2"></i>Isolamento de Risco (NPT 007)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div><label class="precision-label">Distância Existente (m)</label><input type="text" x-model="form.dados_especificos.iso_distancia_existente" class="precision-input"></div>
+                                <div><label class="precision-label">Distância Mínima Requerida (m)</label><input type="text" x-model="form.dados_especificos.iso_distancia_minima" class="precision-input"></div>
+                                <div><label class="precision-label">Área de Aberturas Edif. 1 (m²)</label><input type="text" x-model="form.dados_especificos.iso_ed1_aberturas" class="precision-input"></div>
+                            </div>
+                        </div>
+                        
+                        <div x-show="form.medidas_selecionadas.includes('plano_emergencia')" x-transition class="p-6 bg-white rounded-xl border border-emerald-200 shadow-sm">
+                            <h4 class="font-bold text-emerald-900 mb-4 border-b pb-2"><i class="fas fa-file-medical-alt mr-2"></i>Plano de Emergência (PNE)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><label class="precision-label">Horário de Funcionamento</label><input type="text" x-model="form.dados_especificos.horario_funcionamento" class="precision-input" placeholder="Ex: 8h às 22h"></div>
+                                <div><label class="precision-label">Características do Entorno</label><input type="text" x-model="form.dados_especificos.caracteristicas_entorno" class="precision-input" placeholder="Ex: Baixa concentração"></div>
+                                <div><label class="precision-label">Distância Bombeiros (km)</label><input type="text" x-model="form.dados_especificos.distancia_bombeiros_km" class="precision-input"></div>
+                                <div><label class="precision-label">Endereço Bombeiros</label><input type="text" x-model="form.dados_especificos.endereco_bombeiros" class="precision-input"></div>
+                                <div><label class="precision-label">Nome do Hospital Base</label><input type="text" x-model="form.dados_especificos.hospital_nome" class="precision-input"></div>
+                                <div><label class="precision-label">Endereço Hospital Base</label><input type="text" x-model="form.dados_especificos.hospital_endereco" class="precision-input"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        <h4 class="font-bold text-gray-800 mb-4">Recomendações do Manual Técnico</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            @php
+                                $recomendacoes = [
+                                    'rec_acesso' => 'Recomendações de Acesso de Viaturas',
+                                    'rec_separacao' => 'Recomendações de Separação entre Edificações',
+                                    'rec_estrutural' => 'Recomendações de Segurança Estrutural',
+                                    'rec_compartimentacao' => 'Recomendações de Compartimentação',
+                                    'rec_materiais' => 'Recomendações de Controle de Materiais (CMAR)',
+                                    'rec_saidas' => 'Recomendações de Saídas de Emergência',
+                                    'rec_elevador' => 'Recomendações de Elevador de Emergência',
+                                    'rec_brigada' => 'Recomendações de Brigada de Incêndio',
+                                    'rec_iluminacao' => 'Recomendações de Iluminação de Emergência',
+                                    'rec_alarme' => 'Recomendações de Detecção e Alarme',
+                                    'rec_sinalizacao' => 'Recomendações de Sinalização de Emergência',
+                                    'rec_extintores' => 'Recomendações de Extintores de Incêndio',
+                                    'rec_hidrantes' => 'Recomendações de Hidrantes e Mangotinhos',
+                                    'rec_chuveiros' => 'Recomendações de Chuveiros Automáticos',
+                                    'rec_controle_fumaca' => 'Recomendações de Controle de Fumaça',
+                                    'rec_liquidos' => 'Recomendações de Líquidos e Gases Inflamáveis'
+                                ];
+                            @endphp
+                            @foreach($recomendacoes as $key => $label)
+                                <label class="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="checkbox" @change="toggleRecomendacao('{{ $key }}')" :checked="form.recomendacoes_selecionadas.includes('{{ $key }}')" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+                                    <span class="text-sm font-medium text-gray-700">{{ $label }}</span>
                                 </label>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -295,6 +538,8 @@
                 <!-- Hidden JSON fields -->
                 <input type="hidden" name="ocupacoes" :value="JSON.stringify(form.ocupacoes)">
                 <input type="hidden" name="medidas_selecionadas" :value="JSON.stringify(form.medidas_selecionadas)">
+                <input type="hidden" name="recomendacoes_selecionadas" :value="JSON.stringify(form.recomendacoes_selecionadas)">
+                <input type="hidden" name="dados_especificos" :value="JSON.stringify(form.dados_especificos)">
             </form>
         </div>
     </div>
